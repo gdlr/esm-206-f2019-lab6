@@ -203,8 +203,113 @@ is.na(z)
 # We can use this to make a new function that excludes NA's in z. 
 zz <- z[!is.na(z)]
 
+```
+
+Let's make a new function...
+
+```{r}
+
+calc_mean2 <- function(x_vec, na.rm = TRUE) {
+  
+  # This says, if there are NA's, make a new x_vec that excludes the NA values.
+  if(na.rm == TRUE) {
+    x_vec <- x_vec[!is.na(x_vec)]
+  }
+  
+  n <- length(x_vec)
+  mymean <- sum(x_vec) / n
+  return(mymean)
+}
+  
+```
+
+
+```{r}
+
+data(iris)
+iris_mean <- iris %>% 
+  janitor::clean_names() %>% 
+  group_by(species) %>% 
+  summarize(mean_sepal_w = calc_mean2(sepal_width))
 
 ```
 
+
+Everything in R is a function. These things were all built just like the one we built!
+Every time you use a function, consider: what are the arguments? What are the defaults? And what is the returned value?
+
+
+
+# Loops!
+
+Loops run a certain chunk of code until a certain condition is met. You can do this with different values (like a whole vector) each time! 
+
+## For loop
+
+Let's make a plot for one vector, but then do it again, and again, and again...
+
+```{r}
+# Number of times you want to iterate the whole thing.
+
+times <-  10
+x <- 1
+# For this vector, 
+for(i in 1:times) {
+  x <- x + i
+  print(i + 1)
+}
+
+
+?????????????
+```
+
+
+Explore the distribution of die rolls, using sample()
+
+```{r}
+# Sample takes arguments (x, size, replace = FALSE (Whether you put a sample back or throw it away...))
+
+# Replace = FALSE will make sample never repeat a number. So, if we're talking about dice, we need replace = TRUE
+
+sample(x = 1:6, size = 6, replace = TRUE)
+
+# Let's create a simple data frame.
+
+die_rolls <- data.frame(rolls = sample(1:6, size = 1000, replace = TRUE))
+
+table(die_rolls$rolls)
+
+ggplot(data = die_rolls, aes(x = rolls)) +
+  geom_histogram()
+```
+
+Yay. Let's do a loop to simulate 1,000 simulations of 20 rolls of the die, taking the average for each simulation.
+
+```{r}
+# Let's create a vector for this guy...
+sims <- 100000
+
+mean_results <- vector('numeric', length = sims)
+
+for(j in 1:sims) {
+  rolls_vec <- sample(x = 1:6, size = 20, replace = TRUE)
+  sim_mean <- calc_mean2(x_vec = rolls_vec)
+  mean_results[j] <- sim_mean
+}
+```
+
+
+```{r}
+
+die_df <- data.frame(sim = 1:sims,
+                     mean = mean_results)
+
+ggplot(die_df, aes(x = mean)) +
+  geom_histogram(alpha=0.8, 
+                 fill = "goldenrod") +
+  theme_minimal()
+```
+
+If the probability distributioon of a die roll is uniform, why do these look like normal distributions? Oh, right, it's the Central Limit Theorem! The distribution of the means of the samples will approach a normal distribution.
 
 
