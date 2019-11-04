@@ -1,0 +1,210 @@
+---
+title: "lab_6_esm_206"
+author: "Gabriel De La Rosa"
+date: "11/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warnings = FALSE)
+```
+
+Attach Packages
+
+```{r}
+library(tidyverse)
+```
+
+
+We're gonna be comparing beaver body temperatures (beaver1, beaver2)
+
+Visual exploration:
+
+```{r}
+#Plot both beaver1 and beaver2 on the same histogram
+
+ggplot() +
+  geom_histogram(data = beaver1, aes(x = temp), 
+                 fill = "firebrick",
+                 alpha = 0.8)+
+  geom_histogram(data = beaver2, aes(x = temp), 
+                 fill = "cyan3",
+                 alpha = 0.8)
+
+# We can also use a QQ plot for this...
+
+ggplot(data = beaver2, aes(sample = temp)) +
+         geom_qq()
+
+# Beaver two maybe looks non normal. However, Central Limit Theorem ad our big n's tells us that a t test can still tell us something about our means.
+
+```
+
+Is there a significant difference in mean body temp for beaver 1 and beaver 2?
+
+```{r}
+# Let's do a two sample t-test!
+
+beaver_diff <- t.test(beaver1$temp, beaver2$temp)
+
+beaver_diff
+
+```
+
+Mean body temperatures for beaver 1 (`r round(beaver_diff$estimate[1], 2)`) ......blahblahblah
+
+
+# Now, an introduction to functions and four loops in R with Casey!
+
+
+## Why functions?
+
+Functions are built in packages. Here's what they do behind the scenes, and here's how to write them.
+
+Functions make it easy to do things multiple times!
+Also, you can give simple names to complex looking functions. 
+
+## Make a basic function. 
+
+### This function will take a number and add one to it. 
+
+function() defines functions!
+
+() contains the argument, {} contains the actual modifier.
+
+```{r}
+
+add_one <- function(x) {
+  y <-  x + 1 
+  }
+  
+# You can run this for any given number.
+
+z <- add_one(x = 2)
+
+# Or run it for a vector: creates a new vector (zz in this case) in response.
+
+zz <-  add_one(3:7)
+
+```
+
+```{r}
+
+add_some <- function(x, a = 1) {
+  y = x + a
+  print('yay!')
+  return(y)
+}
+
+# This lets you define multiple inputs for that function.
+# You can define both your values!
+
+z <- add_some (x = 4, a = 6)
+
+zz <- add_some (3:7, a = 100)
+
+# Functions pass the last thing they do back to the user. If you print 'yay!" last, it will return "yay!'. Use return() to specify what you want the user to see!
+```
+
+
+
+Let's create a function that calculates the mean of a vector we give it. First, let's creats a text vector of values. We'll use `rnorm()` to generate a pseudo-random set of numbers as a working sample, with a known mean and SD.
+
+```{r}
+
+set.seed(12345)  ### Seed can be any number - as long as we all use the same seed, we'll all get the same set of random numbers.
+
+test_vec <- rnorm(n = 100, mean = 1, sd = 1)
+
+mean(test_vec)
+sd(test_vec)
+
+```
+
+Let's write a function to calculate the mean.
+It's good to name your function with a verb.
+
+```{r}
+
+calc_mean <-function(x) {
+n <- length(x)
+mymean <- sum(x) / n
+return(mymean)
+}
+
+
+
+z <- calc_mean(test_vec)
+
+```
+
+## Anatomy of a function:
+
+- function() is a function that creates functions.
+- inside the arguments to `function(...)` we put variables required to perform operations. We can provide defaults if we want.
+- within {}, we tell what code we want the function to execute.
+- at the end, R returns the result to the user with 1`return`
+
+
+## Environments
+
+When we run a function, the function spins up a separate environment independent of the global environment. Like a pocket universe, kinda. Then, it returns the value it spits out back to the global environment. The arguments are a window that you can pass info through to the function universe. The return() is a window in which the function can pass that infromation back. 
+
+When the function is done running, the universe dissapears forever.
+
+
+```{r}
+
+# Running a function is independant of global environment. 
+# Here, we define x, then run a function with a different x.
+# The result is the first defined x in the global environment! Not the new x.
+
+x <- 100
+y <- 200
+z = add_one(x = 8)
+
+```
+
+ ### Let's improve this basic mean function.
+ 
+```{r}
+# If you have an NA, then it fucks up your function. We can write in code to tell a function to ignore this!
+
+y <- calc_mean(c(1:10, NA))
+
+test_vec_NA <- test_vec
+
+# Let's put a few NA's in our new test vector copy. [] indexes spots in that vector.
+
+test_vec_NA[5] <- NA
+test_vec_NA[10:15] <- NA
+test_vec_NA[22] <- NA
+
+y <-  calc_mean(test_vec_NA)
+
+# This returns an NA value for mean. That ain't right!
+
+```
+ 
+## Another quick thing with vectors...
+
+How can we find and exclude NA's from our vectors?
+
+```{r}
+z <- c(1:4, NA)
+
+# Let's see if there are any NA's in this vector...
+
+is.na(z)
+
+#or...! flips the function. So, we're asking "what values are not an NA?"
+!is.na(z)
+
+# We can use this to make a new function that excludes NA's in z. 
+zz <- z[!is.na(z)]
+
+
+```
+
+
+
